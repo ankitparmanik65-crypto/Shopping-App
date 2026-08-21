@@ -1,0 +1,88 @@
+const products = [
+  {
+    id: 1,
+    name: "Wireless Headphones",
+    price: 2499,
+    category: "Electronics",
+    image: "https://www.boat-lifestyle.com/cdn/shop/files/Artboard_2_228fca80-9200-441a-9251-8b9694be195e_1800x.png?v=1752729573",
+  },
+  {
+    id: 2,
+    name: "Smart Watch",
+    price: 3999,
+    category: "Electronics",
+    image: "https://www.fastrack.in/dw/image/v2/BKDD_PRD/on/demandware.static/-/Sites-titan-master-catalog/default/dw8178fcf1/images/Fastrack/Catalog/38156NM01_1.jpg?sw=360&sh=360",
+  },
+  {
+    id: 3,
+    name: "Running Shoes",
+    price: 2999,
+    category: "Fashion",
+    image: "https://assets.ajio.com/medias/sys_master/root/20240910/VUoj/66e04e966f60443f316a39d7/-473Wx593H-469647454-blackgrey-MODEL.jpg",
+  },
+  {
+    id: 4,
+    name: "Backpack",
+    price: 1499,
+    category: "Fashion",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ-CusBYX0y3iimgKOnpQtl30tKZ7fA4h7FQaxJ5XkyozCXxG3UKyJusOOb&s=10",
+  },
+  {
+    id: 5,
+    name: "iPhone 17 Pro Max",
+    price: 149900,
+    category: "Mobiles",
+    image: "https://www.designinfo.in/wp-content/uploads/0005/11/Apple-iPhone-17-Pro-Max-Cosmic-Orange-3.webp",
+  },
+  {
+    id: 6,
+    name: "Desk Lamp",
+    price: 1299,
+    category: "Home",
+    image: "https://www.jainsonsemporio.com/cdn/shop/products/RSJ-C009_BT_LampLED.1.jpg?v=1755373366",
+  },
+  {
+    id: 7,
+    name: "Sunglasses",
+    price: 999,
+    category: "Accessories",
+    image: "https://sunglassic.com/cdn/shop/files/JaxenSilverBlackRectangleSunglasses_7.jpg?v=1744788514&width=2000",
+  },
+  {
+    id: 8,
+    name: "Leather Wallet",
+    price: 799,
+    category: "Accessories",
+    image: "https://images.unsplash.com/photo-1627123424574-724758594e93",
+  },
+  {
+    id: 9,
+    name: "Cricket Kit",
+    price: 5999,
+    category: "Sports",
+    image:"https://m.media-amazon.com/images/I/71O8-ltHVAL.jpg",
+  },
+  {
+    id: 10,
+    name: "Gaming Mouse",
+    price: 1499,
+    category: "Electronics",
+    image: "https://m.media-amazon.com/images/I/61QY3V6A-NL.jpg",
+  },
+  {
+    id: 11,
+    name: "Men's Cap",
+    price: 699,
+    category: "Men's Clothing",
+    image: "https://www.underarmour.in/media/catalog/product/cache/94aed228cda806fc9e3c8a7bf666ca42/1/3/1369783-120250416085820150.jpg",
+  },
+  {
+    id: 12,
+    name: "Bluetooth Speaker",
+    price: 2199,
+    category: "Electronics",
+    image: "https://www.simplyshopping.in/cdn/shop/products/71sIaOQ2fRL._SL1500_2048x2048.jpg?v=1676113882",
+  },
+];
+
+export default products;
