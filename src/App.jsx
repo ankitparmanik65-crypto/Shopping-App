@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 
-import products from "./data/products";
-
 import ProductCard from "./components/ProductCard";
 import ProductDetails from "./components/ProductDetails";
 import Cart from "./components/Cart";
@@ -23,6 +21,20 @@ function App() {
     const saved = localStorage.getItem("theme");
     return saved === "dark";
   });
+
+  // =========================
+  // PRODUCTS
+  // =========================
+
+  const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [productsError, setProductsError] = useState("");
+
+  const [skip, setSkip] = useState(0);
+
+  const PRODUCTS_PER_LOAD = 30;
+
+  const [hasMoreProducts, setHasMoreProducts] = useState(true);
 
   // =========================
   // CART
@@ -87,7 +99,10 @@ function App() {
   });
 
   useEffect(() => {
-    localStorage.setItem("wishlist", JSON.stringify(wishlist));
+    localStorage.setItem(
+      "wishlist",
+      JSON.stringify(wishlist)
+    );
   }, [wishlist]);
 
   const wishlistCount = wishlist.length;
@@ -99,11 +114,87 @@ function App() {
   useEffect(() => {
     document.documentElement.setAttribute(
       "data-theme",
-      isDarkMode ? "dark" : "light",
+      isDarkMode ? "dark" : "light"
     );
 
-    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+    localStorage.setItem(
+      "theme",
+      isDarkMode ? "dark" : "light"
+    );
   }, [isDarkMode]);
+
+  // =========================
+  // LOAD PRODUCTS FROM API
+  // =========================
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setProductsLoading(true);
+        setProductsError("");
+
+        const response = await fetch(
+          `https://dummyjson.com/products?limit=${PRODUCTS_PER_LOAD}&skip=${skip}`
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to load products");
+        }
+
+        const data = await response.json();
+
+        const formattedProducts = data.products.map(
+          (product) => ({
+            id: product.id,
+
+            name: product.title,
+
+            // Demo USD -> INR conversion
+            price: Math.round(product.price * 83),
+
+            category: product.category,
+
+            image: product.thumbnail,
+
+            description: product.description,
+          })
+        );
+
+        setProducts((currentProducts) => {
+          // Prevent duplicate products
+          const existingIds = new Set(
+            currentProducts.map((product) => product.id)
+          );
+
+          const newProducts = formattedProducts.filter(
+            (product) => !existingIds.has(product.id)
+          );
+
+          return [
+            ...currentProducts,
+            ...newProducts,
+          ];
+        });
+
+        setHasMoreProducts(
+          skip + PRODUCTS_PER_LOAD < data.total
+        );
+      } catch (error) {
+        console.error(
+          "Product loading error:",
+          error
+        );
+
+        setProductsError(
+          "Unable to load products. Please try again."
+        );
+      } finally {
+        setProductsLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, [skip]);
 
   // =========================
   // SEARCH
@@ -111,14 +202,18 @@ function App() {
 
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategory, setSelectedCategory] =
+    useState("All");
 
   // =========================
   // SAVE CART
   // =========================
 
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
+    localStorage.setItem(
+      "cart",
+      JSON.stringify(cart)
+    );
   }, [cart]);
 
   // =========================
@@ -126,7 +221,10 @@ function App() {
   // =========================
 
   useEffect(() => {
-    localStorage.setItem("orders", JSON.stringify(orders));
+    localStorage.setItem(
+      "orders",
+      JSON.stringify(orders)
+    );
   }, [orders]);
 
   // =========================
@@ -140,8 +238,9 @@ function App() {
   // =========================
 
   const cartTotal = cart.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0,
+    (total, item) =>
+      total + item.price * item.quantity,
+    0
   );
 
   // =========================
@@ -149,8 +248,9 @@ function App() {
   // =========================
 
   const checkoutTotal = checkoutCart.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0,
+    (total, item) =>
+      total + item.price * item.quantity,
+    0
   );
 
   // =========================
@@ -159,23 +259,31 @@ function App() {
 
   const categories = [
     "All",
-    ...new Set(products.map((product) => product.category)),
+    ...new Set(
+      products.map((product) => product.category)
+    ),
   ];
 
   // =========================
   // FILTER PRODUCTS
   // =========================
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
+  const filteredProducts = products.filter(
+    (product) => {
+      const matchesSearch = product.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
 
-    const matchesCategory =
-      selectedCategory === "All" || product.category === selectedCategory;
+      const matchesCategory =
+        selectedCategory === "All" ||
+        product.category === selectedCategory;
 
-    return matchesSearch && matchesCategory;
-  });
+      return (
+        matchesSearch &&
+        matchesCategory
+      );
+    }
+  );
 
   // =========================
   // ADD TO CART
@@ -183,18 +291,20 @@ function App() {
 
   const addToCart = (product) => {
     setCart((currentCart) => {
-      const existingProduct = currentCart.find(
-        (item) => item.id === product.id,
-      );
+      const existingProduct =
+        currentCart.find(
+          (item) => item.id === product.id
+        );
 
       if (existingProduct) {
         return currentCart.map((item) =>
           item.id === product.id
             ? {
                 ...item,
-                quantity: item.quantity + 1,
+                quantity:
+                  item.quantity + 1,
               }
-            : item,
+            : item
         );
       }
 
@@ -218,10 +328,11 @@ function App() {
         item.id === id
           ? {
               ...item,
-              quantity: item.quantity + 1,
+              quantity:
+                item.quantity + 1,
             }
-          : item,
-      ),
+          : item
+      )
     );
   };
 
@@ -236,11 +347,14 @@ function App() {
           item.id === id
             ? {
                 ...item,
-                quantity: item.quantity - 1,
+                quantity:
+                  item.quantity - 1,
               }
-            : item,
+            : item
         )
-        .filter((item) => item.quantity > 0),
+        .filter(
+          (item) => item.quantity > 0
+        )
     );
   };
 
@@ -249,7 +363,11 @@ function App() {
   // =========================
 
   const removeFromCart = (id) => {
-    setCart((currentCart) => currentCart.filter((item) => item.id !== id));
+    setCart((currentCart) =>
+      currentCart.filter(
+        (item) => item.id !== id
+      )
+    );
   };
 
   // =========================
@@ -258,15 +376,19 @@ function App() {
 
   const addToWishlist = (product) => {
     setWishlist((currentWishlist) => {
-      const alreadyExists = currentWishlist.some(
-        (item) => item.id === product.id,
-      );
+      const alreadyExists =
+        currentWishlist.some(
+          (item) => item.id === product.id
+        );
 
       if (alreadyExists) {
         return currentWishlist;
       }
 
-      return [...currentWishlist, product];
+      return [
+        ...currentWishlist,
+        product,
+      ];
     });
   };
 
@@ -276,7 +398,9 @@ function App() {
 
   const removeFromWishlist = (id) => {
     setWishlist((currentWishlist) =>
-      currentWishlist.filter((item) => item.id !== id),
+      currentWishlist.filter(
+        (item) => item.id !== id
+      )
     );
   };
 
@@ -329,7 +453,9 @@ function App() {
   // CHECKOUT -> PAYMENT
   // =========================
 
-  const handleProceedToPayment = (customerData) => {
+  const handleProceedToPayment = (
+    customerData
+  ) => {
     setPendingCustomer(customerData);
 
     setIsCheckoutOpen(false);
@@ -341,17 +467,27 @@ function App() {
   // PAYMENT SUCCESS
   // =========================
 
-  const handlePaymentSuccess = (paymentId) => {
-    console.log("Payment successful:", paymentId);
+  const handlePaymentSuccess = (
+    paymentId
+  ) => {
+    console.log(
+      "Payment successful:",
+      paymentId
+    );
 
-    handleOrderPlaced(pendingCustomer);
+    handleOrderPlaced(
+      pendingCustomer
+    );
   };
 
   // =========================
   // UPDATE ORDER STATUS
   // =========================
 
-  const updateOrderStatus = (orderId, newStatus) => {
+  const updateOrderStatus = (
+    orderId,
+    newStatus
+  ) => {
     setOrders((currentOrders) =>
       currentOrders.map((order) =>
         order.id === orderId
@@ -359,8 +495,8 @@ function App() {
               ...order,
               status: newStatus,
             }
-          : order,
-      ),
+          : order
+      )
     );
   };
 
@@ -368,22 +504,34 @@ function App() {
   // PLACE ORDER
   // =========================
 
-  const handleOrderPlaced = (customerData) => {
-    const subtotal = checkoutCart.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0,
-    );
+  const handleOrderPlaced = (
+    customerData
+  ) => {
+    const subtotal =
+      checkoutCart.reduce(
+        (sum, item) =>
+          sum +
+          item.price *
+            item.quantity,
+        0
+      );
 
-    const shipping = subtotal >= 5000 ? 0 : 99;
+    const shipping =
+      subtotal >= 5000
+        ? 0
+        : 99;
 
-    const total = subtotal + shipping;
+    const total =
+      subtotal + shipping;
 
     const newOrder = {
       id: `ORD-${Date.now()}`,
 
-      customer: customerData,
+      customer:
+        customerData,
 
-      items: checkoutCart,
+      items:
+        checkoutCart,
 
       subtotal,
 
@@ -391,10 +539,16 @@ function App() {
 
       total,
 
-      status: "Order Placed",
+      status:
+        "Order Placed",
     };
 
-    setOrders((currentOrders) => [newOrder, ...currentOrders]);
+    setOrders(
+      (currentOrders) => [
+        newOrder,
+        ...currentOrders,
+      ]
+    );
 
     setOrder(newOrder);
 
@@ -418,31 +572,34 @@ function App() {
   // CONTINUE SHOPPING
   // =========================
 
-  const handleContinueShopping = () => {
-    setOrder(null);
+  const handleContinueShopping =
+    () => {
+      setOrder(null);
 
-    setIsOrdersOpen(false);
-    setIsWishlistOpen(false);
-    setIsCheckoutOpen(false);
-    setIsPaymentOpen(false);
-    setIsCartOpen(false);
+      setIsOrdersOpen(false);
+      setIsWishlistOpen(false);
+      setIsCheckoutOpen(false);
+      setIsPaymentOpen(false);
+      setIsCartOpen(false);
 
-    setSelectedProduct(null);
+      setSelectedProduct(null);
 
-    setCheckoutCart([]);
+      setCheckoutCart([]);
 
-    setIsBuyNow(false);
+      setIsBuyNow(false);
 
-    setSearchTerm("");
+      setSearchTerm("");
 
-    setSelectedCategory("All");
-  };
+      setSelectedCategory("All");
+    };
 
   // =========================
   // PRODUCT DETAILS
   // =========================
 
-  const handleProductClick = (product) => {
+  const handleProductClick = (
+    product
+  ) => {
     setSelectedProduct(product);
 
     setIsOrdersOpen(false);
@@ -458,12 +615,18 @@ function App() {
 
   return (
     <div className="app">
+
       {/* =========================
           ORDER SUCCESS
       ========================= */}
 
       {order ? (
-        <OrderSuccess order={order} onContinue={handleContinueShopping} />
+        <OrderSuccess
+          order={order}
+          onContinue={
+            handleContinueShopping
+          }
+        />
       ) : (
         <>
           {/* =========================
@@ -472,9 +635,17 @@ function App() {
 
           <Navbar
             cartCount={cartCount}
-            wishlistCount={wishlistCount}
-            isDarkMode={isDarkMode}
-            onThemeToggle={() => setIsDarkMode((prev) => !prev)}
+            wishlistCount={
+              wishlistCount
+            }
+            isDarkMode={
+              isDarkMode
+            }
+            onThemeToggle={() =>
+              setIsDarkMode(
+                (prev) => !prev
+              )
+            }
             onWishlistClick={() => {
               setIsWishlistOpen(true);
 
@@ -482,21 +653,29 @@ function App() {
               setIsCartOpen(false);
               setIsCheckoutOpen(false);
               setIsPaymentOpen(false);
-              setSelectedProduct(null);
+              setSelectedProduct(
+                null
+              );
             }}
             onCartClick={() => {
               setIsOrdersOpen(false);
               setIsWishlistOpen(false);
-              setSelectedProduct(null);
+              setSelectedProduct(
+                null
+              );
 
-              setIsCartOpen((prev) => !prev);
+              setIsCartOpen(
+                (prev) => !prev
+              );
             }}
             onOrdersClick={() => {
               setIsCartOpen(false);
               setIsWishlistOpen(false);
               setIsCheckoutOpen(false);
               setIsPaymentOpen(false);
-              setSelectedProduct(null);
+              setSelectedProduct(
+                null
+              );
 
               setIsOrdersOpen(true);
             }}
@@ -506,170 +685,393 @@ function App() {
               MAIN CONTENT
           ========================= */}
 
-          {!isCheckoutOpen && !isPaymentOpen && (
-            <main className="container">
-              {/* =========================
+          {!isCheckoutOpen &&
+            !isPaymentOpen && (
+              <main className="container">
+
+                {/* =========================
                     PRODUCT DETAILS
                 ========================= */}
 
-              {selectedProduct ? (
-                <ProductDetails
-                  product={selectedProduct}
-                  addToCart={addToCart}
-                  onBuyNow={handleBuyNow}
-                  onBack={() => setSelectedProduct(null)}
-                  wishlist={wishlist}
-                  addToWishlist={addToWishlist}
-                />
-              ) : isWishlistOpen ? (
-                /* =========================
+                {selectedProduct ? (
+                  <ProductDetails
+                    product={
+                      selectedProduct
+                    }
+                    addToCart={
+                      addToCart
+                    }
+                    onBuyNow={
+                      handleBuyNow
+                    }
+                    onBack={() =>
+                      setSelectedProduct(
+                        null
+                      )
+                    }
+                    wishlist={
+                      wishlist
+                    }
+                    addToWishlist={
+                      addToWishlist
+                    }
+                  />
+                ) : isWishlistOpen ? (
+
+                  /* =========================
                      WISHLIST
                   ========================= */
 
-                <Wishlist
-                  wishlist={wishlist}
-                  removeFromWishlist={removeFromWishlist}
-                  onProductClick={handleProductClick}
-                  onBack={() => setIsWishlistOpen(false)}
-                />
-              ) : (
-                <>
-                  {/* =========================
+                  <Wishlist
+                    wishlist={
+                      wishlist
+                    }
+                    removeFromWishlist={
+                      removeFromWishlist
+                    }
+                    onProductClick={
+                      handleProductClick
+                    }
+                    onBack={() =>
+                      setIsWishlistOpen(
+                        false
+                      )
+                    }
+                  />
+
+                ) : (
+                  <>
+
+                    {/* =========================
                         PRODUCTS
                     ========================= */}
 
-                  {!isOrdersOpen && (
-                    <>
-                      <div className="page-title">
-                        <h1>Discover Our Products</h1>
+                    {!isOrdersOpen && (
+                      <>
 
-                        <p>Find something you’ll love.</p>
-                      </div>
+                        <div className="page-title">
 
-                      {/* SEARCH */}
+                          <h1>
+                            Discover Our
+                            Products
+                          </h1>
 
-                      <div className="search-container">
-                        <input
-                          type="text"
-                          placeholder="Search products..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                          <p>
+                            Find something
+                            you’ll love.
+                          </p>
 
-                        {searchTerm && (
-                          <button
-                            className="clear-search"
-                            onClick={() => setSearchTerm("")}
-                          >
-                            ✕
-                          </button>
-                        )}
-                      </div>
+                        </div>
 
-                      {/* CATEGORY */}
+                        {/* SEARCH */}
 
-                      <div className="category-filters">
-                        {categories.map((category) => (
-                          <button
-                            key={category}
-                            className={
-                              selectedCategory === category
-                                ? "category-button active"
-                                : "category-button"
+                        <div className="search-container">
+
+                          <input
+                            type="text"
+                            placeholder="Search products..."
+                            value={
+                              searchTerm
                             }
-                            onClick={() => setSelectedCategory(category)}
-                          >
-                            {category}
-                          </button>
-                        ))}
-                      </div>
+                            onChange={(
+                              e
+                            ) =>
+                              setSearchTerm(
+                                e.target.value
+                              )
+                            }
+                          />
 
-                      {/* PRODUCT COUNT */}
+                          {searchTerm && (
+                            <button
+                              className="clear-search"
+                              onClick={() =>
+                                setSearchTerm(
+                                  ""
+                                )
+                              }
+                            >
+                              ✕
+                            </button>
+                          )}
 
-                      <div className="product-count">
-                        Showing {filteredProducts.length}{" "}
-                        {filteredProducts.length === 1
-                          ? "product"
-                          : "products"}
-                      </div>
+                        </div>
 
-                      {/* PRODUCT GRID */}
+                        {/* CATEGORY */}
 
-                      <div className="product-grid">
-                        {filteredProducts.length > 0 ? (
-                          filteredProducts.map((product) => (
-                            <ProductCard
-                              key={product.id}
-                              product={product}
-                              addToCart={addToCart}
-                              onProductClick={handleProductClick}
-                              onBuyNow={handleBuyNow}
-                              wishlist={wishlist}
-                              addToWishlist={addToWishlist}
-                              removeFromWishlist={removeFromWishlist}
-                            />
-                          ))
-                        ) : (
-                          <div className="no-products">
-                            <h2>No products found</h2>
+                        <div className="category-filters">
 
-                            <p>Try searching for something else.</p>
-                          </div>
-                        )}
-                      </div>
-                    </>
-                  )}
+                          {categories.map(
+                            (
+                              category
+                            ) => (
+                              <button
+                                key={
+                                  category
+                                }
+                                className={
+                                  selectedCategory ===
+                                  category
+                                    ? "category-button active"
+                                    : "category-button"
+                                }
+                                onClick={() =>
+                                  setSelectedCategory(
+                                    category
+                                  )
+                                }
+                              >
+                                {
+                                  category
+                                }
+                              </button>
+                            )
+                          )}
 
-                  {/* =========================
+                        </div>
+
+                        {/* PRODUCT COUNT */}
+
+                        <div className="product-count">
+
+                          Showing{" "}
+                          {
+                            filteredProducts.length
+                          }{" "}
+                          {filteredProducts.length ===
+                          1
+                            ? "product"
+                            : "products"}
+
+                        </div>
+
+                        {/* PRODUCT GRID */}
+
+                        <div className="product-grid">
+
+                          {/* INITIAL LOADING */}
+
+                          {productsLoading &&
+                          products.length ===
+                            0 ? (
+                            <div className="no-products">
+
+                              <h2>
+                                Loading
+                                products...
+                              </h2>
+
+                              <p>
+                                Please
+                                wait.
+                              </p>
+
+                            </div>
+                          ) : productsError ? (
+
+                            /* ERROR */
+
+                            <div className="no-products">
+
+                              <h2>
+                                Something
+                                went wrong
+                              </h2>
+
+                              <p>
+                                {
+                                  productsError
+                                }
+                              </p>
+
+                            </div>
+                          ) : filteredProducts.length >
+                            0 ? (
+
+                            /* PRODUCTS */
+
+                            filteredProducts.map(
+                              (
+                                product
+                              ) => (
+                                <ProductCard
+                                  key={
+                                    product.id
+                                  }
+                                  product={
+                                    product
+                                  }
+                                  addToCart={
+                                    addToCart
+                                  }
+                                  onProductClick={
+                                    handleProductClick
+                                  }
+                                  onBuyNow={
+                                    handleBuyNow
+                                  }
+                                  wishlist={
+                                    wishlist
+                                  }
+                                  addToWishlist={
+                                    addToWishlist
+                                  }
+                                  removeFromWishlist={
+                                    removeFromWishlist
+                                  }
+                                />
+                              )
+                            )
+                          ) : (
+
+                            /* NO PRODUCTS */
+
+                            <div className="no-products">
+
+                              <h2>
+                                No products
+                                found
+                              </h2>
+
+                              <p>
+                                Try searching
+                                for something
+                                else.
+                              </p>
+
+                            </div>
+                          )}
+
+                        </div>
+
+                        {/* =========================
+                            LOAD MORE
+                        ========================= */}
+
+                        {!searchTerm &&
+                          hasMoreProducts &&
+                          !productsLoading && (
+                            <div className="load-more-container">
+
+                              <button
+                                className="load-more-button"
+                                onClick={() =>
+                                  setSkip(
+                                    (
+                                      currentSkip
+                                    ) =>
+                                      currentSkip +
+                                      PRODUCTS_PER_LOAD
+                                  )
+                                }
+                              >
+                                Load More
+                                Products
+                              </button>
+
+                            </div>
+                          )}
+
+                        {/* LOADING MORE */}
+
+                        {productsLoading &&
+                          products.length >
+                            0 && (
+                            <p className="loading-more">
+                              Loading more
+                              products...
+                            </p>
+                          )}
+
+                      </>
+                    )}
+
+                    {/* =========================
                         ORDER HISTORY
                     ========================= */}
 
-                  {isOrdersOpen && (
-                    <OrderHistory
-                      orders={orders}
-                      onBack={() => setIsOrdersOpen(false)}
-                      updateOrderStatus={updateOrderStatus}
-                    />
-                  )}
-                </>
-              )}
+                    {isOrdersOpen && (
+                      <OrderHistory
+                        orders={
+                          orders
+                        }
+                        onBack={() =>
+                          setIsOrdersOpen(
+                            false
+                          )
+                        }
+                        updateOrderStatus={
+                          updateOrderStatus
+                        }
+                      />
+                    )}
 
-              {/* =========================
+                  </>
+                )}
+
+                {/* =========================
                     CART DRAWER
                 ========================= */}
 
-              {isCartOpen && (
-                <div
-                  className="cart-overlay"
-                  onClick={() => setIsCartOpen(false)}
-                >
+                {isCartOpen && (
                   <div
-                    className="cart-drawer"
-                    onClick={(e) => e.stopPropagation()}
+                    className="cart-overlay"
+                    onClick={() =>
+                      setIsCartOpen(
+                        false
+                      )
+                    }
                   >
-                    <div className="cart-drawer-header">
-                      <h2>🛒 Your Cart</h2>
 
-                      <button
-                        className="close-cart"
-                        onClick={() => setIsCartOpen(false)}
-                      >
-                        ✕
-                      </button>
+                    <div
+                      className="cart-drawer"
+                      onClick={(e) =>
+                        e.stopPropagation()
+                      }
+                    >
+
+                      <div className="cart-drawer-header">
+
+                        <h2>
+                          🛒 Your Cart
+                        </h2>
+
+                        <button
+                          className="close-cart"
+                          onClick={() =>
+                            setIsCartOpen(
+                              false
+                            )
+                          }
+                        >
+                          ✕
+                        </button>
+
+                      </div>
+
+                      <Cart
+                        cart={cart}
+                        increaseQuantity={
+                          increaseQuantity
+                        }
+                        decreaseQuantity={
+                          decreaseQuantity
+                        }
+                        removeFromCart={
+                          removeFromCart
+                        }
+                        onCheckout={
+                          handleCartCheckout
+                        }
+                      />
+
                     </div>
 
-                    <Cart
-                      cart={cart}
-                      increaseQuantity={increaseQuantity}
-                      decreaseQuantity={decreaseQuantity}
-                      removeFromCart={removeFromCart}
-                      onCheckout={handleCartCheckout}
-                    />
                   </div>
-                </div>
-              )}
-            </main>
-          )}
+                )}
+
+              </main>
+            )}
 
           {/* =========================
               CHECKOUT PAGE
@@ -677,15 +1079,23 @@ function App() {
 
           {isCheckoutOpen && (
             <Checkout
-              cart={checkoutCart}
+              cart={
+                checkoutCart
+              }
               onClose={() => {
-                setIsCheckoutOpen(false);
+                setIsCheckoutOpen(
+                  false
+                );
 
-                setCheckoutCart([]);
+                setCheckoutCart(
+                  []
+                );
 
                 setIsBuyNow(false);
               }}
-              onOrderPlaced={handleProceedToPayment}
+              onOrderPlaced={
+                handleProceedToPayment
+              }
             />
           )}
 
@@ -695,22 +1105,38 @@ function App() {
 
           {isPaymentOpen && (
             <PaymentPage
-              amount={checkoutTotal}
-              orderItems={checkoutCart.map((item) => ({
-                name: item.name,
-                qty: item.quantity,
-                price: item.price * item.quantity,
-              }))}
-              onSuccess={handlePaymentSuccess}
+              amount={
+                checkoutTotal
+              }
+              orderItems={checkoutCart.map(
+                (item) => ({
+                  name:
+                    item.name,
+                  qty:
+                    item.quantity,
+                  price:
+                    item.price *
+                    item.quantity,
+                })
+              )}
+              onSuccess={
+                handlePaymentSuccess
+              }
               onBack={() => {
-                setIsPaymentOpen(false);
+                setIsPaymentOpen(
+                  false
+                );
 
-                setIsCheckoutOpen(true);
+                setIsCheckoutOpen(
+                  true
+                );
               }}
             />
           )}
+
         </>
       )}
+
     </div>
   );
 }

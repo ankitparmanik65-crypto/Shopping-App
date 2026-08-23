@@ -4589,3 +4589,44 @@ button {
     padding: 14px;
   }
 }
+
+/* =========================
+   LOAD MORE PRODUCTS
+========================= */
+
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  margin: 35px 0;
+}
+
+.load-more-button {
+  border: none;
+  background: #111827;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.load-more-button:hover {
+  background: #2563eb;
+}
+
+.loading-more {
+  text-align: center;
+  margin: 20px 0;
+  color: #6b7280;
+}
+
+[data-theme="dark"] .load-more-button {
+  background: #2563eb;
+  color: white;
+}
+
+[data-theme="dark"] .loading-more {
+  color: #9ca3af;
+}
