@@ -10,6 +10,11 @@ function Wishlist({ wishlist, removeFromWishlist, onProductClick, onBack }) {
         </p> */}
       </div>
 
+      <button className="wishlist-back-button" onClick={onBack}>
+        ← Back to Products
+      </button>
+
+
       {wishlist.length === 0 ? (
         <div className="wishlist-empty">
           <h3>Your wishlist is empty</h3>
@@ -42,9 +47,6 @@ function Wishlist({ wishlist, removeFromWishlist, onProductClick, onBack }) {
           ))}
         </div>
       )}
-      <button className="wishlist-back-button" onClick={onBack}>
-        ← Back to Products
-      </button>
     </div>
   );
 }
