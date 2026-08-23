@@ -36,10 +36,10 @@ const products = [
   },
   {
     id: 6,
-    name: "Desk Lamp",
-    price: 1299,
-    category: "Home",
-    image: "https://www.jainsonsemporio.com/cdn/shop/products/RSJ-C009_BT_LampLED.1.jpg?v=1755373366",
+    name: "Office chair",
+    price: 5399,
+    category: "Furniture",
+    image: "https://5.imimg.com/data5/QF/DV/MY-7177052/chair-500x500.jpg",
   },
   {
     id: 7,
@@ -53,7 +53,7 @@ const products = [
     name: "Leather Wallet",
     price: 799,
     category: "Accessories",
-    image: "https://images.unsplash.com/photo-1627123424574-724758594e93",
+    image: "https://www.thetlwh.com/cdn/shop/files/4_047e710e-b9ef-4e5f-a66d-cdbdd1a72b51.png?v=1757400097&width=800",
   },
   {
     id: 9,
