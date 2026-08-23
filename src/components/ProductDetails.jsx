@@ -32,12 +32,6 @@ function ProductDetails({
 
           <p className="product-details-price">₹{product.price}</p>
 
-          {/* <p className="product-description">
-            This is a high-quality {product.name}. Perfect
-            for everyday use and designed to give you a
-            great experience.
-          </p> */}
-
           <p className="product-description">
             {product.description}
           </p>
