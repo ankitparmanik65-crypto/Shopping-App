@@ -1,16 +1,13 @@
 function Wishlist({ wishlist, removeFromWishlist, onProductClick, onBack }) {
   return (
     <div className="wishlist-page">
-      <button className="wishlist-back-button" onClick={onBack}>
-        ← Back to Products
-      </button>
 
       <div className="wishlist-header">
         <h2>❤️ My Wishlist</h2>
 
-        <p>
+        {/* <p>
           {wishlist.length} {wishlist.length === 1 ? "item" : "items"} saved
-        </p>
+        </p> */}
       </div>
 
       {wishlist.length === 0 ? (
@@ -45,6 +42,9 @@ function Wishlist({ wishlist, removeFromWishlist, onProductClick, onBack }) {
           ))}
         </div>
       )}
+      <button className="wishlist-back-button" onClick={onBack}>
+        ← Back to Products
+      </button>
     </div>
   );
 }
